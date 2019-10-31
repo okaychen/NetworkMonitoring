@@ -25,7 +25,7 @@ function getData(baseUrl) {
                 }
                 arr.push(news_item);
                 savedContent(arr);
-                console.log(arr);
+
             });
 
         })
@@ -33,9 +33,13 @@ function getData(baseUrl) {
 }
 
 function savedContent(arr) {
-    fs.writeFile("./data/db.json", JSON.stringify(arr), err => {
-        if (err) throw err;
-    });
+    for (var i = 0; i < arr.length; i++) {
+        console.log(arr[i]);
+        fs.writeFile("./data/db.json", JSON.stringify(arr), err => {
+            if (err) throw err;
+        });
+    }
+
 }
 
 function savedImg($, news_title) {

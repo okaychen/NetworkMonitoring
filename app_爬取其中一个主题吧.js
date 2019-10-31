@@ -2,10 +2,10 @@ var fs = require('fs');
 var http = require('http');
 var cheerio = require("cheerio");
 
-var baseUrl = 'http://tieba.baidu.com/f/index/forumpark?cn=&ci=0&pcn=%E9%AB%98%E7%AD%89%E9%99%A2%E6%A0%A1&pci=0&ct=1&st=new&pn=1';
+var baseUrl = 'http://tieba.baidu.com/f?kw=%E5%A4%A7%E5%AD%A6&ie=utf-8&pn=0';
 
 const startPage = 1;
-const endPage = 30;
+const endPage = 10;
 let page = startPage; // 当前抓取页
 let total = 0; // 数据总数
 let result = [];
@@ -13,13 +13,16 @@ let result = [];
 function filter(data) {
     let final = [];
     let $ = cheerio.load(data);
-    $(".ba_list .ba_info").each(function (idx, element) {
+    $("#thread_list .j_thread_list").each(function (idx, element) {
         $element = $(element);
-        var ba = {
-            ba_name: $(element).find($('.ba_name')).text().trim(),
-            ba_link: 'http://tieba.baidu.com/' + $(element).find($('.ba_href')).attr('href'),
+        var news_item = {
+            title: $(element).find($('a.j_th_tit')).text().trim(),
+            content: $(element).find($('div.threadlist_abs')).text().trim(),
+            link: 'http://tieba.baidu.com' + $(element).find($('a.j_th_tit')).attr('href'),
+            author: $(element).find($('.threadlist_lz .frs-author-name')).text().trim(),
+            time: $(element).find($('.threadlist_reply_date')).text().trim(),
         }
-        final.push(ba);
+        final.push(news_item);
     });
     return final;
 }
@@ -35,11 +38,11 @@ function getData(baseUrl) {
             result = result.concat(formData);
             page++;
             if (page <= endPage) {
-                let tempUrl = `http://tieba.baidu.com/f/index/forumpark?cn=&ci=0&pcn=%E9%AB%98%E7%AD%89%E9%99%A2%E6%A0%A1&pci=0&ct=1&st=new&pn=${page}`;
+                let tempUrl = 'http://tieba.baidu.com/f?kw=%E5%A4%A7%E5%AD%A6&ie=utf-8&pn=' + (page - 1) * 50;
                 getData(tempUrl);
             } else {
 
-                fs.writeFile("./data/db_ba.json", JSON.stringify(result), err => {
+                fs.writeFile("./data/db.json", JSON.stringify(result), err => {
                     if (err) throw err;
                 });
             }
