@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>node-reptile_test</title>
+    <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0
+        }
+
+        .contents {
+            width: 500px;
+            margin: 30px auto;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .type-list {
+            display: none;
+        }
+
+        .active {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="contents">
+        <div class="input-group">
+            <label class="radio-inline">
+                <input type="radio" name="page" checked value="detail"> 详情页
+            </label>
+            <label class="radio-inline">
+                <input type="radio" name="page" value="list"> 列表页
+            </label>
+        </div>
+        <div class="type-list active">
+            <div class="input-group">
+                <span class="input-group-addon">url地址:</span>
+                <input type="text" class="form-control" value="http://news.china.com.cn/2018-08/31/content_61250707.htm"
+                    class="form-control" id="urlName">
+            </div>
+            <div class="input-group">
+                <span class="input-group-addon">标题:</span>
+                <input type="text" class="form-control" value=".articleTitle" class="form-control" id="domTitle">
+            </div>
+            <div class="input-group">
+                <span class="input-group-addon">正文:</span>
+                <input type="text" class="form-control" value="#articleBody" class="form-control" id="domContent">
+            </div>
+            <button id="koaPost" type="submit" data-loading-text="抓取中..." class="btn btn-primary">获取</button>
+        </div>
+        <div class="type-list">
+            <div class="input-group">
+                <span class="input-group-addon">url地址:</span>
+                <input type="text" class="form-control" value="http://news.china.com.cn/node_7247300.htm"
+                    class="form-control" id="urlListName">
+            </div>
+            <div class="input-group">
+                <span class="input-group-addon">列表节点:</span>
+                <input type="text" class="form-control" value=".newsList li" class="form-control" id="domName">
+            </div>
+            <div class="input-group">
+                <span class="input-group-addon">列表内容:</span>
+                <input type="text" class="form-control" value="a" class="form-control" id="domItem">
+            </div>
+            <div class="input-group">
+                <span class="input-group-addon">发布时间:</span>
+                <input type="text" class="form-control" value="span" class="form-control" id="domTime">
+            </div>
+            <button id="koalListPost" type="submit" data-loading-text="抓取中..." class="btn btn-primary">获取</button>
+        </div>
+        <div class="panel panel-default" style="margin-top:15px">
+            <div class="panel-heading">爬虫返回结果</div>
+            <div class="panel-body" id="content">
+                暂无数据
+            </div>
+        </div>
+    </div>
+    <script>
+        $(function () {
+            $(":radio").click(function () {
+                let value = $(this).val()
+                if (value === 'detail') {
+                    $(".type-list").eq(0).show()
+                    $(".type-list").eq(1).hide()
+                } else {
+                    $(".type-list").eq(1).show()
+                    $(".type-list").eq(0).hide()
+                }
+            });
+            $("#koaPost").click(function () {
+                var $btn = $(this).button('loading')
+
+                let params = {
+                    urlName: $("#urlName").val(),
+                    domTitle: $("#domTitle").val(),
+                    domContent: $("#domContent").val(),
+                }
+                $.post("/api/spider", params).then(_ => {
+                    let data = _.data;
+                    let str =
+                        `
+                        <h3>${data.title}<h3 />
+                        <p>${data.content}</p>    
+                    `;
+                    $("#content").html(str);
+                    $btn.button('reset')
+                });
+            })
+            $("#koalListPost").click(function () {
+                var $btn = $(this).button('loading')
+                let params = {
+                    urlName: $("#urlListName").val(),
+                    domName: $("#domName").val(),
+                    domItem: $("#domItem").val(),
+                    domTime: $("#domTime").val(),
+                }
+                $.post("/api/spider/getList", params).then(_ => {
+                    let data = _.data.list;
+                    let str = '';
+                    data.forEach(item => {
+                        str +=
+                            `<a href="${item.url}" class="list-group-item">
+                                <span class="badge">${item.date}</span>
+                                ${item.title}
+                            </a>`
+                    });
+                    $("#content").html(str)
+                    $btn.button('reset')
+                });
+            })
+        })
+    </script>
+</body>
+
+</html>

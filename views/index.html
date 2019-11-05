@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>node-reptile_test</title>
+    <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0
+        }
+
+        .contents {
+            width: 80%;
+            margin: 30px auto;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .type-list {
+            display: none;
+        }
+
+        .active {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="contents">
+        <div class="input-group">
+
+        </div>
+        <div class="type-list active">
+            <div class="input-group">
+                <span class="input-group-addon">主题吧名:</span>
+                <input type="text" class="form-control" value="" class="form-control" id="urlName">
+            </div>
+            <div class="input-group">
+                <span class="input-group-addon">爬取页码:</span>
+                <input type="text" class="form-control" value="" class="form-control" id="urlNum">
+            </div>
+            <button id="koaPost" type="submit" data-loading-text="抓取中..." class="btn btn-primary">获取</button>
+        </div>
+
+        <div class="panel panel-default" style="margin-top:15px">
+            <div class="panel-heading">爬虫返回结果</div>
+            <div class="panel-body" id="content">
+                暂无数据
+            </div>
+        </div>
+    </div>
+    <script>
+        $("#koaPost").click(function () {
+            var $btn = $(this).button('loading')
+
+            let params = {
+                urlName: $("#urlName").val(),
+                urlNum: $("#urlNum").val(),
+            }
+            $.post("/api/spider", params).then(_ => {
+                let data = _.data;
+                let list = data.list;
+                let str = '';
+                if (data.errorCode == -1 || 0) {
+                    alert(data.resMessage)
+                } else {
+                    list.forEach(item => {
+                        str +=
+                            `<div class="list-group-item">
+                            <div>
+                                <a target="_blank" href="${item.url}">
+                                    <span class="badge">${item.date}</span>
+                                    ${item.title}
+                                </a>
+                            </div>
+                            <div>
+                                <p>${item.content}</p>
+                            </div>
+                        </div>`
+                    });
+                };
+                $("#content").html(str);
+                $btn.button('reset');
+            });
+        })
+    </script>
+</body>
+
+</html>
