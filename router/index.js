@@ -2,15 +2,12 @@ const router = require("koa-router")();
 const superagent = require("superagent");
 const cheerio = require("cheerio");
 
-
-
 router.post("/api/spider", async (ctx, next) => {
     let params = ctx.request.body;
     let decodeUrl = encodeURIComponent(params.urlName); //对URL编码 
     let urlNum = parseInt((params.urlNum - 1) * 50);
-    let resMessage, errorCode;
+    let resMessage, errorCode, result = [];
     let baseUrl = `http://tieba.baidu.com/f?kw=${decodeUrl}&ie=utf-8&pn=${urlNum}`;
-    let result = [];
     const oInfo = await superagent.get(baseUrl).set({
         Accept: "application/json"
     });
